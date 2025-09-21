@@ -1,5 +1,4 @@
 Extract audio embeddings from tracks using MERT-v1-330M <br>
-.
 
 Store embeddings + metadata (title, artist, genre) in ChromaDB. <br>
 
