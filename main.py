@@ -1,5 +1,3 @@
-# Indie Music Recommender with MERT + ChromaDB
-
 import os
 import numpy as np
 import pandas as pd
@@ -7,8 +5,6 @@ import torch
 from transformers import AutoProcessor
 from transformers.models.mert.modeling_mert import MERTModel
 import chromadb
-
-# Connect to ChromaDB
 client = chromadb.CloudClient(
     api_key=os.getenv("CHROMADB_API_KEY"),
     tenant=os.getenv("CHROMADB_TENANT"),
@@ -19,12 +15,8 @@ try:
     collection = client.create_collection(name=collection_name)
 except:
     collection = client.get_collection(name=collection_name)
-
-# Load MERT
 processor = AutoProcessor.from_pretrained("facebook/mert-base")
 model = MERTModel.from_pretrained("facebook/mert-base").eval()
-
-# Extract embedding
 def get_mert_embedding_from_file(npy_path):
     waveform = np.load(npy_path)
     if waveform.shape[0] > 1:
@@ -33,8 +25,6 @@ def get_mert_embedding_from_file(npy_path):
     with torch.no_grad():
         embedding = model(waveform_tensor).last_hidden_state.mean(dim=1).squeeze().numpy()
     return embedding
-
-# Process dataset
 def process_waveforms(waveform_folder, metadata_csv):
     df = pd.read_csv(metadata_csv)
     counter = 0
@@ -60,8 +50,6 @@ def process_waveforms(waveform_folder, metadata_csv):
             except Exception as e:
                 print(f"Skipping {filename}: {e}")
     print(f"Finished processing {counter} tracks")
-
-# Recommend songs
 def recommend_songs(chroma_client, collection_name, query_embedding, n_results=5):
     collection = chroma_client.get_collection(name=collection_name)
     results = collection.query(query_embeddings=[query_embedding], n_results=n_results)
